@@ -13,7 +13,8 @@
 # limitations under the License.
 
 from worldgiftart import get_model, storage
-from flask import Blueprint, current_app, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, redirect, render_template, request, \
+    url_for
 
 
 crud = Blueprint('crud', __name__)
