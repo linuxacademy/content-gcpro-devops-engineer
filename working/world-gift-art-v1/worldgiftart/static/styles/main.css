@@ -10,11 +10,10 @@
 #la-logo {
 	padding-top: 0;
 }
-#worldgiftart-logo {
-	background-image: url(/static/images/WorldGiftArt-Logo.png);
+#worldgiftart-logo { 
 	width: 330px;
 	height: 80px;
-	background-repeat: no-repeat;
+    background-color: #db4c3f;
 }
 #addArtwork {
 	text-align: right;
