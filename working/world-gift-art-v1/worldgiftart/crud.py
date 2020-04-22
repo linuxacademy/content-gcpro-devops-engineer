@@ -16,7 +16,6 @@ from worldgiftart import get_model, storage
 from flask import Blueprint, current_app, redirect, render_template, request, \
     url_for
 
-
 crud = Blueprint('crud', __name__)
 
 
@@ -69,12 +68,12 @@ def add():
 
         # If an image was uploaded, update the data to point to the new image.
         # [START image_url]
-        image_url = upload_image_file(request.files.get('image'))
+        image_url = upload_image_file(request.files.get('photo'))
         # [END image_url]
 
         # [START image_url2]
         if image_url:
-            data['imageUrl'] = image_url
+            data['photoUrl'] = image_url
         # [END image_url2]
 
         artwork = get_model().create(data)
@@ -91,10 +90,10 @@ def edit(id):
     if request.method == 'POST':
         data = request.form.to_dict(flat=True)
 
-        image_url = upload_image_file(request.files.get('image'))
+        image_url = upload_image_file(request.files.get('photo'))
 
         if image_url:
-            data['imageUrl'] = image_url
+            data['photoUrl'] = image_url
 
         artwork = get_model().update(data, id)
 
