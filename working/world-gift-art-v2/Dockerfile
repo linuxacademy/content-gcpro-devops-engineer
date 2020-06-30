@@ -7,8 +7,8 @@ ADD . /app
 # Install any necessary dependencies
 RUN pip install -r requirements.txt
 
-# Open port 80 for serving the webpage
-EXPOSE 80
+# Open port 8080 for serving the webpage
+EXPOSE 8080
 
 # Run main.py when the container launches
 CMD ["python", "main.py"]
