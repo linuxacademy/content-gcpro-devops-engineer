@@ -1,0 +1,261 @@
+{
+  "application": "worldart",
+  "description": "On GCB build completion, deploy new image to staging environment and validate.",
+  "expectedArtifacts": [
+    {
+      "displayName": "Staging Replicaset",
+      "id": "04429e2c-b48c-48e7-ac9b-6fdc4e3d7f59",
+      "matchArtifact": {
+        "id": "f52080c9-c9ce-4406-a869-e04af6c01389",
+        "name": "gs://$BUCKET_NAME/worldart-manifests/.*/staging-replicaset.yaml",
+        "type": "gcs/object"
+      },
+      "useDefaultArtifact": false,
+      "usePriorArtifact": true
+    },
+    {
+      "displayName": "Hello World WebApp Image",
+      "id": "4f4d38de-80c3-4bc1-a807-c565bc4024ee",
+      "matchArtifact": {
+        "id": "9aa4d777-1d4e-44f9-8f62-baa33a6a8040",
+        "name": "gcr.io/$PROJECT_ID/spinnaker-for-gcp-worldart",
+        "type": "docker/image"
+      },
+      "useDefaultArtifact": false,
+      "usePriorArtifact": true
+    },
+    {
+      "displayName": "Staging Namespace",
+      "id": "097c2e8e-295f-4020-85d9-18ed18f6133b",
+      "matchArtifact": {
+        "id": "4be2cb5b-bfee-43cc-a2e8-c544777f3436",
+        "name": "gs://$BUCKET_NAME/worldart-manifests/.*/staging-namespace.yaml",
+        "type": "gcs/object"
+      },
+      "useDefaultArtifact": false,
+      "usePriorArtifact": true
+    },
+    {
+      "displayName": "Staging Service",
+      "id": "24f64da7-9eac-46df-8b0d-f7092b6a03e4",
+      "matchArtifact": {
+        "id": "09755b68-001a-4d61-bb17-985546618e5f",
+        "name": "gs://$BUCKET_NAME/worldart-manifests/.*/staging-service.yaml",
+        "type": "gcs/object"
+      },
+      "useDefaultArtifact": false,
+      "usePriorArtifact": true
+    }
+  ],
+  "keepWaitingPipelines": false,
+  "limitConcurrent": true,
+  "name": "Deploy to Staging",
+  "parameterConfig": [],
+  "stages": [
+    {
+      "account": "spinnaker-install-account",
+      "cloudProvider": "kubernetes",
+      "expectedArtifacts": [],
+      "manifestArtifactAccount": "gcs-install-account",
+      "manifestArtifactId": "04429e2c-b48c-48e7-ac9b-6fdc4e3d7f59",
+      "manifests": [],
+      "moniker": {
+        "app": "worldart"
+      },
+      "name": "Deploy Replicaset to Staging",
+      "refId": "1",
+      "relationships": {
+        "loadBalancers": [],
+        "securityGroups": []
+      },
+      "requiredArtifactIds": [
+        "4f4d38de-80c3-4bc1-a807-c565bc4024ee"
+      ],
+      "requisiteStageRefIds": [
+        "8"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": true,
+        "options": {
+          "enableTraffic": true,
+          "namespace": "worldart-staging",
+          "services": [
+            "service worldart-service"
+          ],
+          "strategy": "highlander"
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "account": "spinnaker-install-account",
+      "app": "worldart",
+      "cloudProvider": "kubernetes",
+      "completeOtherBranchesThenFail": false,
+      "continuePipeline": true,
+      "failPipeline": false,
+      "location": "worldart-staging",
+      "manifestName": "job validate-deployment",
+      "mode": "static",
+      "name": "Clean up Validation Job",
+      "options": {
+        "cascading": true
+      },
+      "refId": "2",
+      "requisiteStageRefIds": [
+        "5"
+      ],
+      "type": "deleteManifest"
+    },
+    {
+      "account": "spinnaker-install-account",
+      "cloudProvider": "kubernetes",
+      "completeOtherBranchesThenFail": false,
+      "continuePipeline": true,
+      "failPipeline": false,
+      "manifestArtifactAccount": "gcs-install-account",
+      "manifests": [
+        {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "name": "validate-deployment",
+            "namespace": "worldart-staging"
+          },
+          "spec": {
+            "backoffLimit": 0,
+            "template": {
+              "spec": {
+                "containers": [
+                  {
+                    "command": [
+                      "/bin/sh",
+                      "-c",
+                      "curl --max-time 120 worldart-service"
+                    ],
+                    "image": "appropriate/curl:latest",
+                    "name": "validate-deployment"
+                  }
+                ],
+                "restartPolicy": "Never"
+              }
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "worldart"
+      },
+      "name": "Validate Staging",
+      "refId": "5",
+      "relationships": {
+        "loadBalancers": [],
+        "securityGroups": []
+      },
+      "requisiteStageRefIds": [
+        "1"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "text",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "comments": "Fails the pipeline if the validation failed.",
+      "name": "Check Validation status",
+      "preconditions": [
+        {
+          "context": {
+            "expression": "${ #stage(\"Validate Staging\")['status'].toString() == 'SUCCEEDED'}"
+          },
+          "failPipeline": true,
+          "type": "expression"
+        }
+      ],
+      "refId": "6",
+      "requisiteStageRefIds": [
+        "2"
+      ],
+      "type": "checkPreconditions"
+    },
+    {
+      "account": "spinnaker-install-account",
+      "cloudProvider": "kubernetes",
+      "manifestArtifactAccount": "gcs-install-account",
+      "manifestArtifactId": "097c2e8e-295f-4020-85d9-18ed18f6133b",
+      "moniker": {
+        "app": "worldart"
+      },
+      "name": "Deploy Namespace",
+      "refId": "7",
+      "relationships": {
+        "loadBalancers": [],
+        "securityGroups": []
+      },
+      "requiredArtifactIds": [],
+      "requisiteStageRefIds": [],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "account": "spinnaker-install-account",
+      "cloudProvider": "kubernetes",
+      "manifestArtifactAccount": "gcs-install-account",
+      "manifestArtifactId": "24f64da7-9eac-46df-8b0d-f7092b6a03e4",
+      "moniker": {
+        "app": "worldart"
+      },
+      "name": "Deploy Service",
+      "refId": "8",
+      "relationships": {
+        "loadBalancers": [],
+        "securityGroups": []
+      },
+      "requiredArtifactIds": [],
+      "requisiteStageRefIds": [
+        "7"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    }
+  ],
+  "triggers": [
+    {
+      "attributeConstraints": {
+        "status": "SUCCESS"
+      },
+      "enabled": true,
+      "expectedArtifactIds": [
+        "4f4d38de-80c3-4bc1-a807-c565bc4024ee"
+      ],
+      "payloadConstraints": {},
+      "pubsubSystem": "google",
+      "subscriptionName": "gcb-account",
+      "type": "pubsub"
+    }
+  ]
+}

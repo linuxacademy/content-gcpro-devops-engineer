@@ -1,0 +1,420 @@
+{
+  "application": "worldart",
+  "description": "When staging deployment and validation completes, Blue/Green deploy new image to production environment and validate.",
+  "expectedArtifacts": [
+    {
+      "displayName": "Prod Replicaset",
+      "id": "d9013e3f-e9cd-4f18-ace6-ef14369b7fec",
+      "matchArtifact": {
+        "id": "b4557686-0d7e-4163-8cb5-f7e7f1310fa8",
+        "name": "gs://$BUCKET_NAME/worldart-manifests/.*/prod-replicaset.yaml",
+        "type": "gcs/object"
+      },
+      "useDefaultArtifact": false,
+      "usePriorArtifact": true
+    },
+    {
+      "displayName": "Hello World WebApp Image",
+      "id": "4f4d38de-80c3-4bc1-a807-c565bc4024ee",
+      "matchArtifact": {
+        "id": "9aa4d777-1d4e-44f9-8f62-baa33a6a8040",
+        "name": "gcr.io/$PROJECT_ID/spinnaker-for-gcp-worldart",
+        "type": "docker/image"
+      },
+      "useDefaultArtifact": false,
+      "usePriorArtifact": true
+    },
+    {
+      "displayName": "Prod Namespace",
+      "id": "730af75f-50ad-49ab-b754-ec8ae75938f8",
+      "matchArtifact": {
+        "id": "1d82dc39-76e1-4a96-8f9c-7f68b3edfa67",
+        "name": "gs://$BUCKET_NAME/worldart-manifests/.*/prod-namespace.yaml",
+        "type": "gcs/object"
+      },
+      "useDefaultArtifact": false,
+      "usePriorArtifact": true
+    },
+    {
+      "displayName": "Prod Service",
+      "id": "76641671-4d6b-4aee-94b4-dba73fbabfcd",
+      "matchArtifact": {
+        "id": "63b7838b-045b-4681-9a54-852cdb22efd0",
+        "name": "gs://$BUCKET_NAME/worldart-manifests/.*/prod-service.yaml",
+        "type": "gcs/object"
+      },
+      "useDefaultArtifact": false,
+      "usePriorArtifact": true
+    }
+  ],
+  "keepWaitingPipelines": false,
+  "limitConcurrent": true,
+  "name": "Deploy to Production",
+  "notifications": [
+    {
+      "level": "pipeline",
+      "publisherName": "$PUBSUB_NOTIFICATION_PUBLISHER",
+      "type": "pubsub",
+      "when": [
+        "pipeline.failed"
+      ]
+    }
+  ],
+  "parameterConfig": [],
+  "stages": [
+    {
+      "account": "spinnaker-install-account",
+      "cloudProvider": "kubernetes",
+      "expectedArtifacts": [],
+      "manifestArtifactAccount": "gcs-install-account",
+      "manifestArtifactId": "d9013e3f-e9cd-4f18-ace6-ef14369b7fec",
+      "manifests": [],
+      "moniker": {
+        "app": "worldart"
+      },
+      "name": "Blue/Green Deploy Replicaset to Production",
+      "refId": "1",
+      "relationships": {
+        "loadBalancers": [],
+        "securityGroups": []
+      },
+      "requiredArtifactIds": [
+        "4f4d38de-80c3-4bc1-a807-c565bc4024ee"
+      ],
+      "requisiteStageRefIds": [
+        "8"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": true,
+        "options": {
+          "enableTraffic": true,
+          "namespace": "worldart-prod",
+          "services": [
+            "service worldart-service"
+          ],
+          "strategy": "redblack"
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "failPipeline": true,
+      "instructions": "Continue with deployment?",
+      "judgmentInputs": [],
+      "name": "Manual Judgment",
+      "notifications": [],
+      "refId": "2",
+      "requisiteStageRefIds": [],
+      "type": "manualJudgment"
+    },
+    {
+      "account": "spinnaker-install-account",
+      "app": "worldart",
+      "cloudProvider": "kubernetes",
+      "completeOtherBranchesThenFail": false,
+      "continuePipeline": true,
+      "failPipeline": false,
+      "location": "worldart-prod",
+      "manifestName": "job validate-deployment",
+      "mode": "static",
+      "name": "Clean up Validation Job",
+      "options": {
+        "cascading": true
+      },
+      "refId": "4",
+      "requisiteStageRefIds": [
+        "5"
+      ],
+      "type": "deleteManifest"
+    },
+    {
+      "account": "spinnaker-install-account",
+      "cloudProvider": "kubernetes",
+      "completeOtherBranchesThenFail": false,
+      "continuePipeline": true,
+      "failPipeline": false,
+      "manifestArtifactAccount": "gcs-install-account",
+      "manifests": [
+        {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "name": "validate-deployment",
+            "namespace": "worldart-prod"
+          },
+          "spec": {
+            "backoffLimit": 0,
+            "template": {
+              "spec": {
+                "containers": [
+                  {
+                    "command": [
+                      "/bin/sh",
+                      "-c",
+                      "curl --max-time 120 worldart-service"
+                    ],
+                    "image": "appropriate/curl:latest",
+                    "name": "validate-deployment"
+                  }
+                ],
+                "restartPolicy": "Never"
+              }
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "worldart"
+      },
+      "name": "Validate New Prod",
+      "refId": "5",
+      "relationships": {
+        "loadBalancers": [],
+        "securityGroups": []
+      },
+      "requisiteStageRefIds": [
+        "1"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "text",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "account": "spinnaker-install-account",
+      "cloudProvider": "kubernetes",
+      "manifestArtifactAccount": "gcs-install-account",
+      "manifestArtifactId": "730af75f-50ad-49ab-b754-ec8ae75938f8",
+      "moniker": {
+        "app": "worldart"
+      },
+      "name": "Deploy Namespace",
+      "refId": "7",
+      "relationships": {
+        "loadBalancers": [],
+        "securityGroups": []
+      },
+      "requiredArtifactIds": [],
+      "requisiteStageRefIds": [
+        "2"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "account": "spinnaker-install-account",
+      "cloudProvider": "kubernetes",
+      "manifestArtifactAccount": "gcs-install-account",
+      "manifestArtifactId": "76641671-4d6b-4aee-94b4-dba73fbabfcd",
+      "moniker": {
+        "app": "worldart"
+      },
+      "name": "Deploy Service",
+      "refId": "8",
+      "relationships": {
+        "loadBalancers": [],
+        "securityGroups": []
+      },
+      "requiredArtifactIds": [],
+      "requisiteStageRefIds": [
+        "7"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "name": "Wait before Scale Down",
+      "refId": "9",
+      "requisiteStageRefIds": [
+        "17"
+      ],
+      "type": "wait",
+      "waitTime": 300
+    },
+    {
+      "account": "spinnaker-install-account",
+      "app": "worldart",
+      "cloudProvider": "kubernetes",
+      "cluster": "replicaSet worldart-frontend",
+      "criteria": "second_newest",
+      "kind": "replicaSet",
+      "location": "worldart-prod",
+      "mode": "dynamic",
+      "name": "Scale Down Old Prod",
+      "refId": "10",
+      "replicas": "0",
+      "requisiteStageRefIds": [
+        "9"
+      ],
+      "type": "scaleManifest"
+    },
+    {
+      "failPipeline": true,
+      "instructions": "Validation Failed - Rollback to Old Prod?",
+      "judgmentInputs": [],
+      "name": "Rollback on Failure",
+      "notifications": [],
+      "refId": "11",
+      "requisiteStageRefIds": [
+        "16"
+      ],
+      "type": "manualJudgment"
+    },
+    {
+      "account": "spinnaker-install-account",
+      "app": "worldart",
+      "cloudProvider": "kubernetes",
+      "cluster": "replicaSet worldart-frontend",
+      "criteria": "second_newest",
+      "kind": "replicaSet",
+      "location": "worldart-prod",
+      "mode": "dynamic",
+      "name": "Enable Old Prod",
+      "refId": "12",
+      "requisiteStageRefIds": [
+        "11"
+      ],
+      "type": "enableManifest"
+    },
+    {
+      "account": "spinnaker-install-account",
+      "app": "worldart",
+      "cloudProvider": "kubernetes",
+      "cluster": "replicaSet worldart-frontend",
+      "criteria": "newest",
+      "kind": "replicaSet",
+      "location": "worldart-prod",
+      "mode": "dynamic",
+      "name": "Disable New Prod",
+      "refId": "13",
+      "requisiteStageRefIds": [
+        "12"
+      ],
+      "type": "disableManifest"
+    },
+    {
+      "name": "Validation Failed - Fail Pipeline",
+      "preconditions": [
+        {
+          "context": {
+            "expression": "${ #stage(\"Validate New Prod\")['status'].toString() == 'SUCCEEDED'}"
+          },
+          "failPipeline": true,
+          "type": "expression"
+        }
+      ],
+      "refId": "14",
+      "requisiteStageRefIds": [
+        "13"
+      ],
+      "stageEnabled": {
+        "expression": "${ #stage(\"Validate New Prod\")['status'].toString() != 'SUCCEEDED'}",
+        "type": "expression"
+      },
+      "type": "checkPreconditions"
+    },
+    {
+      "completeOtherBranchesThenFail": false,
+      "continuePipeline": false,
+      "failPipeline": false,
+      "name": "Validation Succeeded",
+      "preconditions": [
+        {
+          "context": {
+            "expression": "${ #stage(\"Validate New Prod\")['status'].toString() == 'SUCCEEDED'}"
+          },
+          "failPipeline": false,
+          "type": "expression"
+        }
+      ],
+      "refId": "15",
+      "requisiteStageRefIds": [
+        "4"
+      ],
+      "type": "checkPreconditions"
+    },
+    {
+      "completeOtherBranchesThenFail": false,
+      "continuePipeline": false,
+      "failPipeline": false,
+      "name": "Validation Failed",
+      "preconditions": [
+        {
+          "context": {
+            "expression": "${ #stage(\"Validate New Prod\")['status'].toString() != 'SUCCEEDED'}"
+          },
+          "failPipeline": true,
+          "type": "expression"
+        }
+      ],
+      "refId": "16",
+      "requisiteStageRefIds": [
+        "4"
+      ],
+      "type": "checkPreconditions"
+    },
+    {
+      "name": "Old Prod Version Present",
+      "preconditions": [
+        {
+          "cloudProvider": "kubernetes",
+          "context": {
+            "cluster": "replicaSet worldart-frontend",
+            "comparison": ">",
+            "credentials": "spinnaker-install-account",
+            "expected": 1,
+            "moniker": {
+              "app": "worldart",
+              "cluster": "replicaSet worldart-frontend"
+            },
+            "regions": [
+              "worldart-prod"
+            ]
+          },
+          "failPipeline": false,
+          "type": "clusterSize"
+        }
+      ],
+      "refId": "17",
+      "requisiteStageRefIds": [
+        "15"
+      ],
+      "type": "checkPreconditions"
+    }
+  ],
+  "triggers": [
+    {
+      "application": "worldart",
+      "enabled": true,
+      "pipeline": "$DEPLOY_STAGING_PIPELINE_ID",
+      "status": [
+        "successful"
+      ],
+      "type": "pipeline"
+    }
+  ]
+}
