@@ -6,9 +6,7 @@ bold() {
 
 source ~/cloudshell_open/spinnaker-for-gcp/scripts/install/properties
 
-~/cloudshell_open/spinnaker-for-gcp/scripts/manage/check_project_mismatch.sh
 
-pushd ~/cloudshell_open/spinnaker-for-gcp/samples/world-gift-art
 
 if ! ~/spin app list &> /dev/null ; then
   bold "Spinnaker instance is not reachable via the Spin CLI. Please make sure the Spinnaker \
@@ -27,7 +25,7 @@ fi
 if [ ! -d ~/world-gift-art ]; then
   bold 'Creating GCR repo "world-gift-art" in project...'
   gcloud source repos create world-gift-art
-  gcloud source repos clone world-gift-art ~/world-gift-art
+  gcloud source repos clone world-gift-art
 fi
 
 cd ~/world-gift-art
