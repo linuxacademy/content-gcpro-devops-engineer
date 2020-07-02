@@ -15,7 +15,7 @@ steps:
       fi
     done
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA', 'working/world-gift-art-v3/.']
+  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA', 'working/world-gift-art-v2/.']
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA']
 images:

@@ -1,0 +1,23 @@
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  annotations:
+    traffic.spinnaker.io/load-balancers: '["service helloworldwebapp-service"]'
+  labels:
+    app: helloworldwebapp
+  name: helloworldwebapp-frontend
+  namespace: helloworldwebapp-prod
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: helloworldwebapp
+  template:
+    metadata:
+      labels:
+        app: helloworldwebapp
+    spec:
+      containers:
+        - image: gcr.io/$PROJECT_ID/spinnaker-for-gcp-helloworldwebapp # will be modified on deployment to point at a digest of an image
+          name: helloworldwebapp
