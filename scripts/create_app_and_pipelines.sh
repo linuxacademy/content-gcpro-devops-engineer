@@ -8,7 +8,7 @@ source ~/cloudshell_open/spinnaker-for-gcp/scripts/install/properties
 
 ~/cloudshell_open/spinnaker-for-gcp/scripts/manage/check_project_mismatch.sh
 
-pushd ~/cloudshell_open/spinnaker-for-gcp/samples/worldart
+pushd ~/cloudshell_open/spinnaker-for-gcp/samples/world-gift-art
 
 if ! ~/spin app list &> /dev/null ; then
   bold "Spinnaker instance is not reachable via the Spin CLI. Please make sure the Spinnaker \
@@ -24,49 +24,49 @@ run this command:
   exit 1
 fi
 
-if [ ! -d ~/worldart ]; then
-  bold 'Creating GCR repo "worldart" in Spinnaker project...'
-  gcloud source repos create worldart
-  gcloud source repos clone worldart ~/worldart
+if [ ! -d ~/world-gift-art ]; then
+  bold 'Creating GCR repo "world-gift-art" in project...'
+  gcloud source repos create world-gift-art
+  gcloud source repos clone world-gift-art ~/world-gift-art
 fi
 
-cd worldart
+cd ~/world-gift-art
 git pull https://github.com/linuxacademy/content-gcpro-devops-engineer
 
-cat ~/worldart/working/world-gift-art-v3/templates/repo/cloudbuild_yaml.template | envsubst '$BUCKET_NAME' > ~/worldart/working/world-gift-art-v3/cloudbuild.yaml
-cat ~/worldart/working/world-gift-art-v3/config/staging/replicaset_yaml.template | envsubst > ~/worldart/working/world-gift-art-v3/config/staging/replicaset.yaml
-rm ~/worldart/working/world-gift-art-v3/config/staging/replicaset_yaml.template
-cat ~/worldart/working/world-gift-art-v3/config/prod/replicaset_yaml.template | envsubst > ~/worldart/working/world-gift-art-v3/config/prod/replicaset.yaml
-rm ~/worldart/working/world-gift-art-v3/config/prod/replicaset_yaml.template
+cat ~/world-gift-art/working/world-gift-art-v3/templates/repo/cloudbuild_yaml.template | envsubst '$BUCKET_NAME' > ~/world-gift-art/working/world-gift-art-v3/cloudbuild.yaml
+cat ~/world-gift-art/working/world-gift-art-v3/config/staging/replicaset_yaml.template | envsubst > ~/world-gift-art/working/world-gift-art-v3/config/staging/replicaset.yaml
+rm ~/world-gift-art/working/world-gift-art-v3/config/staging/replicaset_yaml.template
+cat ~/world-gift-art/working/world-gift-art-v3/config/prod/replicaset_yaml.template | envsubst > ~/world-gift-art/working/world-gift-art-v3/config/prod/replicaset.yaml
+rm ~/world-gift-art/working/world-gift-art-v3/config/prod/replicaset_yaml.template
 
+# substitute current project ID and assets buckets for placeholders in config.py file
+cd working/world-gift-art-v3
+sed -i s/[[]YOUR-PROJECT-ID[]]/$PROJECT_ID/ config.py
+sed -i s/[[]YOUR-BUCKET-NAME[]]/$PROJECT_ID-worldart-assets/ config.py
+
+
+
+bold "Creating world-gift-art Spinnaker application..."
+~/spin app save --application-name world-gift-art --cloud-providers kubernetes --owner-email $IAP_USER
+
+bold 'Creating "Deploy to Staging" Spinnaker pipeline...'
+cat ~/world-gift-art/working/world-gift-art-v3/templates/pipelines/deploystaging_json.template | envsubst  > ~/world-gift-art/working/world-gift-art-v3/templates/pipelines/deploystaging.json
+~/spin pi save -f ~/world-gift-art/working/world-gift-art-v3/templates/pipelines/deploystaging.json
+
+export DEPLOY_STAGING_PIPELINE_ID=$(~/spin pi get -a world-gift-art -n 'Deploy to Staging' | jq -r '.id')
+
+bold 'Creating "Deploy to Prod" Spinnaker pipeline...'
+cat ~/world-gift-art/working/world-gift-art-v3/templates/pipelines/deployprod_json.template | envsubst  > ~/world-gift-art/working/world-gift-art-v3/templates/pipelines/deployprod.json
+~/spin pi save -f ~/world-gift-art/working/world-gift-art-v3/templates/pipelines/deployprod.json
 
 git add *
 git commit -m "Add source, build, and manifest files."
 git push
 
-popd
-
-
-bold "Creating worldart Spinnaker application..."
-~/spin app save --application-name worldart --cloud-providers kubernetes --owner-email $IAP_USER
-
-bold 'Creating "Deploy to Staging" Spinnaker pipeline...'
-cat ~/worldart/working/world-gift-art-v3/templates/pipelines/deploystaging_json.template | envsubst  > ~/worldart/working/world-gift-art-v3/templates/pipelines/deploystaging.json
-~/spin pi save -f ~/worldart/working/world-gift-art-v3/templates/pipelines/deploystaging.json
-
-export DEPLOY_STAGING_PIPELINE_ID=$(~/spin pi get -a worldart -n 'Deploy to Staging' | jq -r '.id')
-
-bold 'Creating "Deploy to Prod" Spinnaker pipeline...'
-cat ~/worldart/working/world-gift-art-v3/templates/pipelines/deployprod_json.template | envsubst  > ~/worldart/working/world-gift-art-v3/templates/pipelines/deployprod.json
-~/spin pi save -f ~/worldart/working/world-gift-art-v3/templates/pipelines/deployprod.json
-
-if [ -z $(gcloud alpha builds triggers list --filter triggerTemplate.repoName=worldart --format 'get(id)') ]; then
-  bold "Creating Cloud Build build trigger for helloworld app..."
+if [ -z $(gcloud alpha builds triggers list --filter triggerTemplate.repoName=world-gift-art --format 'get(id)') ]; then
+  bold "Creating Cloud Build build trigger for world-gift-art app..."
   gcloud alpha builds triggers create cloud-source-repositories \
-    --repo worldart \
+    --repo world-gift-art \
     --branch-pattern master \
     --build-config working/world-gift-art-v3/cloudbuild.yaml
 fi
-
-
-popd
