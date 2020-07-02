@@ -3,21 +3,21 @@ apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
   annotations:
-    traffic.spinnaker.io/load-balancers: '["service helloworldwebapp-service"]'
+    traffic.spinnaker.io/load-balancers: '["service world-gift-art-service"]'
   labels:
-    app: helloworldwebapp
-  name: helloworldwebapp-frontend
-  namespace: helloworldwebapp-staging
+    app: world-gift-art
+  name: world-gift-art-frontend
+  namespace: world-gift-art-staging
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: helloworldwebapp
+      app: world-gift-art
   template:
     metadata:
       labels:
-        app: helloworldwebapp
+        app: world-gift-art
     spec:
       containers:
-        - image: gcr.io/$PROJECT_ID/spinnaker-for-gcp-helloworldwebapp # will be modified on deployment to point at a digest of an image
-          name: helloworldwebapp
+        - image: gcr.io/$PROJECT_ID/spinnaker-for-gcp-world-gift-art # will be modified on deployment to point at a digest of an image
+          name: world-gift-art

@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: helloworldwebapp-service
-  namespace: helloworldwebapp-staging
+  name: world-gift-art-service
+  namespace: world-gift-art-staging
 spec:
   ports:
   - protocol: TCP
     port: 80
   selector:
-    frontedBy: helloworldwebapp-staging # will be applied to backends by Spinnaker
+    frontedBy: world-gift-art-staging # will be applied to backends by Spinnaker
   type: LoadBalancer
   loadBalancerIP: ""

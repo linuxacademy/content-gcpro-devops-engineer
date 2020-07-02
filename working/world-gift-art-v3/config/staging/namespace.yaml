@@ -2,4 +2,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: helloworldwebapp-staging
+  name: world-gift-art-staging

@@ -22,5 +22,5 @@ images:
   - 'gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA'
 artifacts:
   objects:
-    location: gs://$BUCKET_NAME/worldart-manifests/$SHORT_SHA
+    location: gs://$BUCKET_NAME/world-gift-art-manifests/$SHORT_SHA
     paths: [ 'config-all/*' ]

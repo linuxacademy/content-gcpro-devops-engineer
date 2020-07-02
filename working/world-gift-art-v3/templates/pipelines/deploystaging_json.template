@@ -1,5 +1,5 @@
 {
-  "application": "worldart",
+  "application": "world-gift-art",
   "description": "On GCB build completion, deploy new image to staging environment and validate.",
   "expectedArtifacts": [
     {
@@ -7,18 +7,18 @@
       "id": "04429e2c-b48c-48e7-ac9b-6fdc4e3d7f59",
       "matchArtifact": {
         "id": "f52080c9-c9ce-4406-a869-e04af6c01389",
-        "name": "gs://$BUCKET_NAME/worldart-manifests/.*/staging-replicaset.yaml",
+        "name": "gs://$BUCKET_NAME/world-gift-art-manifests/.*/staging-replicaset.yaml",
         "type": "gcs/object"
       },
       "useDefaultArtifact": false,
       "usePriorArtifact": true
     },
     {
-      "displayName": "Hello World WebApp Image",
+      "displayName": "world-gift-art Image",
       "id": "4f4d38de-80c3-4bc1-a807-c565bc4024ee",
       "matchArtifact": {
         "id": "9aa4d777-1d4e-44f9-8f62-baa33a6a8040",
-        "name": "gcr.io/$PROJECT_ID/spinnaker-for-gcp-worldart",
+        "name": "gcr.io/$PROJECT_ID/world-gift-art",
         "type": "docker/image"
       },
       "useDefaultArtifact": false,
@@ -29,7 +29,7 @@
       "id": "097c2e8e-295f-4020-85d9-18ed18f6133b",
       "matchArtifact": {
         "id": "4be2cb5b-bfee-43cc-a2e8-c544777f3436",
-        "name": "gs://$BUCKET_NAME/worldart-manifests/.*/staging-namespace.yaml",
+        "name": "gs://$BUCKET_NAME/world-gift-art-manifests/.*/staging-namespace.yaml",
         "type": "gcs/object"
       },
       "useDefaultArtifact": false,
@@ -40,7 +40,7 @@
       "id": "24f64da7-9eac-46df-8b0d-f7092b6a03e4",
       "matchArtifact": {
         "id": "09755b68-001a-4d61-bb17-985546618e5f",
-        "name": "gs://$BUCKET_NAME/worldart-manifests/.*/staging-service.yaml",
+        "name": "gs://$BUCKET_NAME/world-gift-art-manifests/.*/staging-service.yaml",
         "type": "gcs/object"
       },
       "useDefaultArtifact": false,
@@ -60,7 +60,7 @@
       "manifestArtifactId": "04429e2c-b48c-48e7-ac9b-6fdc4e3d7f59",
       "manifests": [],
       "moniker": {
-        "app": "worldart"
+        "app": "world-gift-art"
       },
       "name": "Deploy Replicaset to Staging",
       "refId": "1",
@@ -80,9 +80,9 @@
         "enabled": true,
         "options": {
           "enableTraffic": true,
-          "namespace": "worldart-staging",
+          "namespace": "world-gift-art-staging",
           "services": [
-            "service worldart-service"
+            "service world-gift-art-service"
           ],
           "strategy": "highlander"
         }
@@ -91,12 +91,12 @@
     },
     {
       "account": "spinnaker-install-account",
-      "app": "worldart",
+      "app": "world-gift-art",
       "cloudProvider": "kubernetes",
       "completeOtherBranchesThenFail": false,
       "continuePipeline": true,
       "failPipeline": false,
-      "location": "worldart-staging",
+      "location": "world-gift-art-staging",
       "manifestName": "job validate-deployment",
       "mode": "static",
       "name": "Clean up Validation Job",
@@ -122,7 +122,7 @@
           "kind": "Job",
           "metadata": {
             "name": "validate-deployment",
-            "namespace": "worldart-staging"
+            "namespace": "world-gift-art-staging"
           },
           "spec": {
             "backoffLimit": 0,
@@ -133,7 +133,7 @@
                     "command": [
                       "/bin/sh",
                       "-c",
-                      "curl --max-time 120 worldart-service"
+                      "curl --max-time 120 world-gift-art-service"
                     ],
                     "image": "appropriate/curl:latest",
                     "name": "validate-deployment"
@@ -146,7 +146,7 @@
         }
       ],
       "moniker": {
-        "app": "worldart"
+        "app": "world-gift-art"
       },
       "name": "Validate Staging",
       "refId": "5",
@@ -192,7 +192,7 @@
       "manifestArtifactAccount": "gcs-install-account",
       "manifestArtifactId": "097c2e8e-295f-4020-85d9-18ed18f6133b",
       "moniker": {
-        "app": "worldart"
+        "app": "world-gift-art"
       },
       "name": "Deploy Namespace",
       "refId": "7",
@@ -219,7 +219,7 @@
       "manifestArtifactAccount": "gcs-install-account",
       "manifestArtifactId": "24f64da7-9eac-46df-8b0d-f7092b6a03e4",
       "moniker": {
-        "app": "worldart"
+        "app": "world-gift-art"
       },
       "name": "Deploy Service",
       "refId": "8",

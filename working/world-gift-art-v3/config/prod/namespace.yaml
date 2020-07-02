@@ -2,4 +2,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: helloworldwebapp-prod
+  name: world-gift-art-prod
