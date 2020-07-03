@@ -21,29 +21,29 @@ You can create and manage projects at https://console.developers.google.com
 import os
 
 # The secret key is used by Flask to encrypt session cookies.
-SECRET_KEY = 'secret'
+SECRET_KEY = "secret"
 
 # There are three different ways to store the data in the application.
 # You can choose 'datastore', 'cloudsql', or 'mongodb'. Be sure to
 # configure the respective settings for the one you choose below.
 # You do not have to configure the other data backends. If unsure, choose
 # 'datastore' as it does not require any additional configuration.
-DATA_BACKEND = 'datastore'
+DATA_BACKEND = "datastore"
 
 # Google Cloud Project ID. This can be found on the 'Overview' page at
 # https://console.developers.google.com
-PROJECT_ID = '[YOUR-PROJECT-ID]'
+PROJECT_ID = "[YOUR-PROJECT-ID]"
 
 # CloudSQL & SQLAlchemy configuration
 # Replace the following values the respective values of your Cloud SQL
 # instance.
-CLOUDSQL_USER = 'root'
-CLOUDSQL_PASSWORD = 'your-cloudsql-password'
-CLOUDSQL_DATABASE = 'lagiftart'
+CLOUDSQL_USER = "root"
+CLOUDSQL_PASSWORD = "your-cloudsql-password"
+CLOUDSQL_DATABASE = "lagiftart"
 # Set this value to the Cloud SQL connection name, e.g.
 #   "project:region:cloudsql-instance".
 # You must also update the value in app.yaml.
-CLOUDSQL_CONNECTION_NAME = 'your-cloudsql-connection-name'
+CLOUDSQL_CONNECTION_NAME = "your-cloudsql-connection-name"
 
 # The CloudSQL proxy is used locally to connect to the cloudsql instance.
 # To start the proxy, use:
@@ -55,19 +55,22 @@ CLOUDSQL_CONNECTION_NAME = 'your-cloudsql-connection-name'
 
 # Alternatively, you could use a local MySQL instance for testing.
 LOCAL_SQLALCHEMY_DATABASE_URI = (
-    'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{database}').format(
-        user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD,
-        database=CLOUDSQL_DATABASE)
+    "mysql+pymysql://{user}:{password}@127.0.0.1:3306/{database}"
+).format(user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD, database=CLOUDSQL_DATABASE)
 
 # When running on App Engine a unix socket is used to connect to the cloudsql
 # instance.
 LIVE_SQLALCHEMY_DATABASE_URI = (
-    'mysql+pymysql://{user}:{password}@localhost/{database}'
-    '?unix_socket=/cloudsql/{connection_name}').format(
-        user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD,
-        database=CLOUDSQL_DATABASE, connection_name=CLOUDSQL_CONNECTION_NAME)
+    "mysql+pymysql://{user}:{password}@localhost/{database}"
+    "?unix_socket=/cloudsql/{connection_name}"
+).format(
+    user=CLOUDSQL_USER,
+    password=CLOUDSQL_PASSWORD,
+    database=CLOUDSQL_DATABASE,
+    connection_name=CLOUDSQL_CONNECTION_NAME,
+)
 
-if os.environ.get('GAE_INSTANCE'):
+if os.environ.get("GAE_INSTANCE"):
     SQLALCHEMY_DATABASE_URI = LIVE_SQLALCHEMY_DATABASE_URI
 else:
     SQLALCHEMY_DATABASE_URI = LOCAL_SQLALCHEMY_DATABASE_URI
@@ -75,7 +78,7 @@ else:
 # Mongo configuration
 # If using mongolab, the connection URI is available from the mongolab control
 # panel. If self-hosting on compute engine, replace the values below.
-MONGO_URI = 'mongodb://user:password@host:27017/database'
+MONGO_URI = "mongodb://user:password@host:27017/database"
 
 # Google Cloud Storage and upload settings.
 # Typically, you'll name your bucket the same as your project. To create a
@@ -90,6 +93,6 @@ MONGO_URI = 'mongodb://user:password@host:27017/database'
 #
 # You can adjust the max content length and allow extensions settings to allow
 # larger or more varied file types if desired.
-CLOUD_STORAGE_BUCKET = '[YOUR-BUCKET-NAME]'
+CLOUD_STORAGE_BUCKET = "[YOUR-BUCKET-NAME]"
 MAX_CONTENT_LENGTH = 8 * 1024 * 1024
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(["png", "jpg", "jpeg", "gif"])
