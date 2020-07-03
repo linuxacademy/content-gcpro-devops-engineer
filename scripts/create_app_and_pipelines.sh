@@ -6,8 +6,10 @@ bold() {
 
 source ~/cloudshell_open/spinnaker-for-gcp/scripts/install/properties
 
+# Enable Datastore API:
+gcloud services enable datastore.googleapis.com
 
-
+# Error checking to ensure port forwarding/IAP access to Spinnaker is enabled before proceeding
 if ! ~/spin app list &> /dev/null ; then
   bold "Spinnaker instance is not reachable via the Spin CLI. Please make sure the Spinnaker \
 instance is reachable with port-forwarding or is exposed publicly.
