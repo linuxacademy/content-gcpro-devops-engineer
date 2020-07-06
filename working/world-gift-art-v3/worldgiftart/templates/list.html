@@ -28,25 +28,26 @@
 </div>
 
 <div class="row">
-{% for artwork in artworks %}
-<div class="media outerMedia col-md-3">
-  <a href="/artworks/{{artwork.id}}">
-    <div class="media">
-      {% if artwork.photoUrl %}
+  {% for artwork in artworks %}
+  <div class="media outerMedia col-md-3">
+    <a href="/artworks/{{artwork.id}}">
+      <div class="media">
+        {% if artwork.photoUrl %}
         <img class="artwork-image img-responsive" src="{{artwork.photoUrl}}">
-      {% else %}
-        <img class="artwork-image img-responsive" src="https://github.com/linuxacademy/content-gcpro-devops-engineer/blob/master/working/world-gift-art-v1/worldgiftart/static/images/generic-world-artwork.png?raw=true">
-      {% endif %}
-    </div>
-    <div class="media-body">
-      <h4>{{artwork.title}}</h4>
-      <p>{{artwork.artist}}</p>
-    </div>
-  </a>
-</div>
-{% else %}
-<p>No artworks found</p>
-{% endfor %}
+        {% else %}
+        <img class="artwork-image img-responsive"
+          src="https://github.com/linuxacademy/content-gcpro-devops-engineer/blob/master/working/world-gift-art-v3/worldgiftart/static/images/generic-world-artwork.png?raw=true">
+        {% endif %}
+      </div>
+      <div class="media-body">
+        <h4>{{artwork.title}}</h4>
+        <p>{{artwork.artist}}</p>
+      </div>
+    </a>
+  </div>
+  {% else %}
+  <p>No artworks found</p>
+  {% endfor %}
 </div>
 
 {% if next_page_token %}
