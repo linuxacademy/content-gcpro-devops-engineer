@@ -19,5 +19,5 @@ spec:
         app: world-gift-art
     spec:
       containers:
-        - image: gcr.io/$PROJECT_ID/spinnaker-for-gcp-world-gift-art # will be modified on deployment to point at a digest of an image
+        - image: gcr.io/$PROJECT_ID/world-gift-art # will be modified on deployment to point at a digest of an image
           name: world-gift-art

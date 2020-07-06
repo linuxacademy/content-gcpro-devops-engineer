@@ -7,7 +7,7 @@ steps:
     mkdir config-all
 
     # rename config files to be appended with the environment, e.g. staging-service.yaml
-    for env in config/*; do
+    for env in working/world-gift-art-v3/config/*; do
       if [ -d $env ]; then
         for file in $env/*; do
           cp $file config-all/$(basename $env)-$(basename $file)
@@ -15,7 +15,7 @@ steps:
       fi
     done
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA', 'working/world-gift-art-v2/.']
+  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA', 'working/world-gift-art-v3/.']
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA']
 images:

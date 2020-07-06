@@ -8,6 +8,7 @@ spec:
   ports:
   - protocol: TCP
     port: 80
+    targetPort: 8080
   selector:
     frontedBy: world-gift-art-prod # will be applied to backends by Spinnaker
   type: LoadBalancer

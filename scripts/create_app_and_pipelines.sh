@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# return to home directory
+cd
+
 bold() {
   echo ". $(tput bold)" "$*" "$(tput sgr0)";
 }
@@ -24,11 +27,15 @@ run this command:
   exit 1
 fi
 
-if [ ! -d ~/world-gift-art ]; then
-  bold 'Creating GCR repo "world-gift-art" in project...'
-  gcloud source repos create world-gift-art
-  gcloud source repos clone world-gift-art
-fi
+# create GCS bucket and assign public access
+gsutil mb -l $REGION gs://$PROJECT_ID-worldart-assets
+gsutil iam ch allUsers:objectViewer gs://$PROJECT_ID-worldart-assets
+
+bold 'Creating GCR repo "world-gift-art" in project...'
+cd
+gcloud source repos create world-gift-art
+gcloud source repos clone world-gift-art ~/world-gift-art
+
 
 cd ~/world-gift-art
 git pull https://github.com/linuxacademy/content-gcpro-devops-engineer
@@ -63,10 +70,8 @@ git add *
 git commit -m "Add source, build, and manifest files."
 git push
 
-if [ -z $(gcloud alpha builds triggers list --filter triggerTemplate.repoName=world-gift-art --format 'get(id)') ]; then
-  bold "Creating Cloud Build build trigger for world-gift-art app..."
-  gcloud alpha builds triggers create cloud-source-repositories \
-    --repo world-gift-art \
-    --branch-pattern master \
-    --build-config working/world-gift-art-v3/cloudbuild.yaml
-fi
+bold "Creating Cloud Build build trigger for world-gift-art app..."
+gcloud beta builds triggers create cloud-source-repositories \
+  --repo world-gift-art \
+  --branch-pattern master \
+  --build-config working/world-gift-art-v3/cloudbuild.yaml
