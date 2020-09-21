@@ -52,4 +52,7 @@ kubectl autoscale deployment world-gift-art --cpu-percent=80 --min=3 --max=5
 
 echo
 echo "Deployment Complete!"
+echo "Find your app's IP address by referencing the EXTERNAL_IP address using command"
+echo "kubectl get services"
+echo "Or by referencing the Services menu in the GKE web console"
 echo
