@@ -32,7 +32,7 @@ git init
 git pull https://github.com/linuxacademy/content-gcpro-devops-engineer
 
 # substitute current project ID and assets buckets for placeholders in config.py file
-cd quick-gke-deployment
+cd quick-deploy/quick-gke-deployment
 sed -i s/[[]YOUR-PROJECT-ID[]]/$PROJECT_ID/ config.py
 sed -i s/[[]YOUR-BUCKET-NAME[]]/$PROJECT_ID-worldart-assets/ config.py
 
